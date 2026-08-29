@@ -1,5 +1,7 @@
 import { HeroSection } from "@/components/hero/hero-section";
+import { Journey } from "@/components/journey/journey";
 import { SiteNavigation } from "@/components/navigation/site-navigation";
+import { Projects } from "@/components/projects/projects";
 import { PlaceholderSection } from "@/components/sections/placeholder-section";
 
 export default function Home() {
@@ -8,8 +10,8 @@ export default function Home() {
       <SiteNavigation />
       <main>
         <HeroSection />
-        <PlaceholderSection id="journey" index="01" eyebrow="Origin log" title="Journey" description="A living record of the questions, experiments, and turning points that shape how I build." />
-        <PlaceholderSection id="projects" index="02" eyebrow="Selected builds" title="Projects" description="A focused collection of products, prototypes, and systems is being assembled here." />
+        <Journey />
+        <Projects />
         <PlaceholderSection id="stats" index="03" eyebrow="Signals incoming" title="Stats" description="This area is reserved for a future live and cached developer statistics system—no invented numbers in the meantime." isLast />
       </main>
       <footer id="resume" className="border-t border-white/10 px-6 py-8 sm:px-10 lg:px-16">
