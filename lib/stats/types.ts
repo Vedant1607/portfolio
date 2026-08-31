@@ -64,3 +64,42 @@ export class GitHubStatsSnapshotWriteError extends Error {
     this.name = new.target.name;
   }
 }
+
+export class GitHubStatsCacheMissingError extends Error {
+  readonly code = "CACHE_MISSING";
+
+  constructor(readonly cause: unknown) {
+    super("GitHub statistics request failed and no cached snapshot exists.", {
+      cause,
+    });
+    this.name = new.target.name;
+  }
+}
+
+export class GitHubStatsFallbackDatabaseError extends Error {
+  readonly code = "FALLBACK_DATABASE_ERROR";
+
+  constructor(readonly cause: unknown) {
+    super("GitHub statistics request failed and the cache lookup failed.", {
+      cause,
+    });
+    this.name = new.target.name;
+  }
+}
+
+export class GitHubStatsCacheValidationError extends Error {
+  readonly code = "CACHE_VALIDATION_ERROR";
+
+  constructor(
+    readonly issues: ReadonlyArray<{
+      message: string;
+      path: ReadonlyArray<string | number>;
+    }>,
+    readonly cause: unknown,
+  ) {
+    super("The cached GitHub statistics snapshot did not match the snapshot schema.", {
+      cause,
+    });
+    this.name = new.target.name;
+  }
+}
