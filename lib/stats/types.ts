@@ -65,6 +65,15 @@ export class GitHubStatsSnapshotWriteError extends Error {
   }
 }
 
+export class GitHubStatsSnapshotReadError extends Error {
+  readonly code = "SNAPSHOT_READ_ERROR";
+
+  constructor(readonly cause: unknown) {
+    super("Failed to read the GitHub statistics snapshot.", { cause });
+    this.name = new.target.name;
+  }
+}
+
 export class GitHubStatsCacheMissingError extends Error {
   readonly code = "CACHE_MISSING";
 

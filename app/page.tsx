@@ -2,7 +2,9 @@ import { HeroSection } from "@/components/hero/hero-section";
 import { Journey } from "@/components/journey/journey";
 import { SiteNavigation } from "@/components/navigation/site-navigation";
 import { Projects } from "@/components/projects/projects";
-import { PlaceholderSection } from "@/components/sections/placeholder-section";
+import { Stats } from "@/components/stats/stats";
+
+export const dynamic = "force-dynamic";
 
 export default function Home() {
   return (
@@ -12,7 +14,7 @@ export default function Home() {
         <HeroSection />
         <Journey />
         <Projects />
-        <PlaceholderSection id="stats" index="03" eyebrow="Signals incoming" title="Stats" description="This area is reserved for a future live and cached developer statistics system—no invented numbers in the meantime." isLast />
+        <Stats />
       </main>
       <footer id="resume" className="border-t border-white/10 px-6 py-8 sm:px-10 lg:px-16">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
