@@ -50,6 +50,32 @@ export class LeetCodeStatsSnapshotWriteError extends Error {
   }
 }
 
+export class LeetCodeStatsSnapshotReadError extends Error {
+  readonly code = "SNAPSHOT_READ_ERROR";
+
+  constructor(readonly cause: unknown) {
+    super("Failed to read the LeetCode statistics snapshot.", { cause });
+    this.name = new.target.name;
+  }
+}
+
+export class LeetCodeStatsCacheValidationError extends Error {
+  readonly code = "CACHE_VALIDATION_ERROR";
+
+  constructor(
+    readonly issues: ReadonlyArray<{
+      message: string;
+      path: ReadonlyArray<string | number>;
+    }>,
+    readonly cause: unknown,
+  ) {
+    super("The cached LeetCode statistics snapshot did not match the snapshot schema.", {
+      cause,
+    });
+    this.name = new.target.name;
+  }
+}
+
 export function validateLeetCodeStatsSnapshotData(
   value: unknown,
 ): LeetCodeStats {
