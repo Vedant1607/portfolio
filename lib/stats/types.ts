@@ -1,8 +1,71 @@
 import "server-only";
 
 import { z } from "zod";
+import type { LeetCodeStats } from "@/lib/leetcode/types";
 
 export const GITHUB_STATS_SCHEMA_VERSION = 1;
+export const LEETCODE_STATS_SCHEMA_VERSION = 1;
+
+export const leetCodeStatsSnapshotDataSchema = z.object({
+  username: z.string().min(1),
+  totalSolved: z.number().int().nonnegative(),
+  easySolved: z.number().int().nonnegative(),
+  mediumSolved: z.number().int().nonnegative(),
+  hardSolved: z.number().int().nonnegative(),
+  ranking: z.number().int().nonnegative().nullable(),
+});
+
+export type LeetCodeStatsSnapshotData = z.infer<
+  typeof leetCodeStatsSnapshotDataSchema
+>;
+
+export interface LeetCodeStatsSyncMetadata {
+  id: string;
+  source: "leetcode";
+  schemaVersion: typeof LEETCODE_STATS_SCHEMA_VERSION;
+  fetchedAt: Date;
+  createdAt: Date;
+}
+
+export class LeetCodeStatsSnapshotValidationError extends Error {
+  readonly code = "SNAPSHOT_VALIDATION_ERROR";
+
+  constructor(
+    readonly issues: ReadonlyArray<{
+      message: string;
+      path: ReadonlyArray<string | number>;
+    }>,
+  ) {
+    super("Normalized LeetCode stats did not match the snapshot schema.");
+    this.name = new.target.name;
+  }
+}
+
+export class LeetCodeStatsSnapshotWriteError extends Error {
+  readonly code = "SNAPSHOT_WRITE_ERROR";
+
+  constructor() {
+    super("Failed to persist the LeetCode statistics snapshot.");
+    this.name = new.target.name;
+  }
+}
+
+export function validateLeetCodeStatsSnapshotData(
+  value: unknown,
+): LeetCodeStats {
+  const result = leetCodeStatsSnapshotDataSchema.safeParse(value);
+
+  if (!result.success) {
+    throw new LeetCodeStatsSnapshotValidationError(
+      result.error.issues.map((issue) => ({
+        message: issue.message,
+        path: issue.path.map(String),
+      })),
+    );
+  }
+
+  return result.data;
+}
 
 const contributionLevelSchema = z.enum([
   "NONE",
