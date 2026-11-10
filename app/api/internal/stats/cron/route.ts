@@ -2,9 +2,7 @@ import "server-only";
 
 import { createHash, timingSafeEqual } from "node:crypto";
 
-import { syncGitHubStats } from "@/lib/stats/sync-github";
-
-const ONE_YEAR_IN_MILLISECONDS = 365 * 24 * 60 * 60 * 1000;
+import { syncAllStats } from "@/lib/stats/sync-all-stats";
 
 function getBearerToken(request: Request): string | undefined {
   const authorization = request.headers.get("authorization");
@@ -36,24 +34,54 @@ export async function GET(request: Request): Promise<Response> {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const to = new Date();
-  const from = new Date(to.getTime() - ONE_YEAR_IN_MILLISECONDS);
-
   try {
-    const snapshot = await syncGitHubStats({ from, to });
+    const result = await syncAllStats();
 
-    return Response.json({
-      id: snapshot.id,
-      source: snapshot.source,
-      fetchedAt: snapshot.fetchedAt,
-    });
-  } catch (error) {
-    console.error("GitHub statistics synchronization failed.", {
-      error: error instanceof Error ? error.name : "UnknownError",
+    for (const provider of ["github", "leetcode"] as const) {
+      const providerResult = result[provider];
+      if (providerResult.status === "failed") {
+        console.error("Statistics provider synchronization failed.", {
+          provider,
+          errorClass: providerResult.error.errorClass,
+          ...(providerResult.error.errorCode
+            ? { errorCode: providerResult.error.errorCode }
+            : {}),
+        });
+      }
+    }
+
+    const toResponseProvider = (
+      providerResult: typeof result.github | typeof result.leetcode,
+    ) => {
+      if (providerResult.status === "failed") {
+        return { status: "failed" as const };
+      }
+
+      return {
+        status: "success" as const,
+        snapshot: {
+          id: providerResult.snapshot.id,
+          source: providerResult.snapshot.source,
+          fetchedAt: providerResult.snapshot.fetchedAt,
+        },
+      };
+    };
+
+    return Response.json(
+      {
+        status: result.status,
+        github: toResponseProvider(result.github),
+        leetcode: toResponseProvider(result.leetcode),
+      },
+      { status: result.status === "failed" ? 500 : 200 },
+    );
+  } catch {
+    console.error("Statistics synchronization orchestration failed.", {
+      errorClass: "UnexpectedError",
     });
 
     return Response.json(
-      { error: "GitHub statistics synchronization failed." },
+      { error: "Statistics synchronization failed." },
       { status: 500 },
     );
   }
